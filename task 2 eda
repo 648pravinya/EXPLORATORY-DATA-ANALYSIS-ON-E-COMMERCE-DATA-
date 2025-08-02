@@ -1,0 +1,112 @@
+ E-Commerce Data Analytics Application 
+
+# Install necessary libraries
+!pip install ipywidgets seaborn --quiet
+
+# Import libraries
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+
+# Upload CSV File
+from google.colab import files
+uploaded = files.upload()
+
+# Load DataFrame
+for file_name in uploaded.keys():
+    df = pd.read_csv(file_name)
+
+# Ensure Purchase Date is in datetime format if exists
+if 'Purchase Date' in df.columns:
+    df['Purchase Date'] = pd.to_datetime(df['Purchase Date'])
+
+# Function to display Product Category Distribution
+def product_category_distribution():
+    plt.figure(figsize=(10,5))
+    sns.countplot(x='Product Category', data=df)
+    plt.title('Product Category Distribution')
+    plt.xticks(rotation=45)
+    plt.show()
+
+# Function to display Monthly Sales Trend
+def monthly_sales_trend():
+    monthly_sales = df.groupby(df['Purchase Date'].dt.to_period('M'))['Net Amount'].sum()
+    plt.figure(figsize=(12,6))
+    monthly_sales.plot(kind='line', marker='o')
+    plt.title('Monthly Sales Trend')
+    plt.xlabel('Month')
+    plt.ylabel('Net Sales (INR)')
+    plt.grid(True)
+    plt.show()
+
+# Function to display Top 10 Customers by Revenue
+def top_customers():
+    top_cust = df.groupby('CID')['Net Amount'].sum().sort_values(ascending=False).head(10)
+    plt.figure(figsize=(10,6))
+    sns.barplot(x=top_cust.values, y=top_cust.index, palette='viridis')
+    plt.title('Top 10 Customers by Revenue')
+    plt.xlabel('Revenue (INR)')
+    plt.ylabel('Customer ID')
+    plt.show()
+
+# Function to display Sales by Location
+def sales_by_location():
+    location_sales = df.groupby('Location')['Net Amount'].sum().sort_values(ascending=False)
+    plt.figure(figsize=(8,8))
+    location_sales.plot(kind='pie', autopct='%1.1f%%', startangle=140)
+    plt.title('Sales Distribution by Location')
+    plt.ylabel('')
+    plt.show()
+
+# Function to display Discount Impact Analysis
+def discount_impact():
+    plt.figure(figsize=(10,6))
+    sns.boxplot(x='Discount Availed', y='Net Amount', data=df)
+    plt.title('Discount Impact on Net Amount')
+    plt.show()
+
+# Widget Buttons
+button1 = widgets.Button(description="Product Category Distribution")
+button2 = widgets.Button(description="Monthly Sales Trend")
+button3 = widgets.Button(description="Top 10 Customers by Revenue")
+button4 = widgets.Button(description="Sales by Location")
+button5 = widgets.Button(description="Discount Impact Analysis")
+
+# Button Functions
+def on_button1_clicked(b):
+    clear_output(wait=True)
+    display(buttons_box)
+    product_category_distribution()
+
+def on_button2_clicked(b):
+    clear_output(wait=True)
+    display(buttons_box)
+    monthly_sales_trend()
+
+def on_button3_clicked(b):
+    clear_output(wait=True)
+    display(buttons_box)
+    top_customers()
+
+def on_button4_clicked(b):
+    clear_output(wait=True)
+    display(buttons_box)
+    sales_by_location()
+
+def on_button5_clicked(b):
+    clear_output(wait=True)
+    display(buttons_box)
+    discount_impact()
+
+# Linking buttons to functions
+button1.on_click(on_button1_clicked)
+button2.on_click(on_button2_clicked)
+button3.on_click(on_button3_clicked)
+button4.on_click(on_button4_clicked)
+button5.on_click(on_button5_clicked)
+
+# Displaying Buttons
+buttons_box = widgets.HBox([button1, button2, button3, button4, button5])
+display(buttons_box)
